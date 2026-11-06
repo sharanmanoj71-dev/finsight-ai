@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: finsight-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: SUPABASE_URL
+        value: https://pxacwjmgcxcxdtzjzyli.supabase.co
+      - key: SUPABASE_KEY
+        value: sb_publishable_R5GuF0x6AG1qVm0IRwQEzg_eL7vHNm6
+      - key: FIREBASE_PROJECT_ID
+        value: technovate-c048c
+      - key: CORS_ORIGINS
+        value: "*"
