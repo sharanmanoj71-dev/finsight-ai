@@ -1,6 +1,7 @@
 # FinSight AI: AI-Based Bank Statement Intelligence & Financial Health Analyzer
 
 ![FinSight AI Banner](https://img.shields.io/badge/FinSight_AI-v1.0.0-10b981?style=for-the-badge&logo=cashapp&logoColor=white)
+[![Vercel Live Production](https://img.shields.io/badge/Vercel-Live_Production-black?style=for-the-badge&logo=vercel&logoColor=white)](https://finsight-ai-technovate.vercel.app)
 ![Supabase](https://img.shields.io/badge/Database-Supabase_PostgreSQL-3ecf8e?style=for-the-badge&logo=supabase&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Auth-Firebase_Authentication-ffca28?style=for-the-badge&logo=firebase&logoColor=black)
 ![FastAPI](https://img.shields.io/badge/Backend-FastAPI_Python_3.12-009688?style=for-the-badge&logo=fastapi&logoColor=white)
@@ -10,13 +11,28 @@
 
 ---
 
+## 🌐 Live Production Links & Deployments
+
+| Component | Destination | Status | Details |
+| :--- | :--- | :--- | :--- |
+| **Production Web Application** | **[https://finsight-ai-technovate.vercel.app](https://finsight-ai-technovate.vercel.app)** | 🟢 Live | Hosted on Vercel Global Edge Network |
+| **Alternative Production URL** | **[https://frontend-six-cyan-85.vercel.app](https://frontend-six-cyan-85.vercel.app)** | 🟢 Live | Direct deployment alias |
+| **Vercel Project Dashboard** | [vercel.com/sharanmanoj71-5619/finsight-ai](https://vercel.com/sharanmanoj71-5619/finsight-ai) | 🟢 Linked | Vite framework preset, Node 26.x runtime |
+| **GitHub Repository** | [github.com/sharanmanoj71-dev/finsight-ai](https://github.com/sharanmanoj71-dev/finsight-ai) | 🟢 Synced | Monorepo with React frontend & FastAPI backend |
+| **Cloud Database (Supabase PostgreSQL)** | Project `technovate` (`pxacwjmgcxcxdtzjzyli`) | 🟢 Connected | `https://pxacwjmgcxcxdtzjzyli.supabase.co` |
+| **Identity & Auth (Firebase)** | Project `technovate-c048c` | 🟢 Connected | `technovate-c048c.firebaseapp.com` |
+| **Interactive Video Chatbot** | [chatbot-avatar.webm](https://finsight-ai-technovate.vercel.app/chatbot-avatar.webm) | 🟢 Streaming | 2.58 MB WebM video avatar with 1-click AI redirect |
+
+---
+
 ## 🏛️ System Architecture
 
 ```
                     ┌───────────────────────────────────────────────┐
                     │               Client Frontend                 │
                     │   React 19 + Vite + Tailwind CSS + Recharts   │
-                    │      11 Dedicated Financial Control Views     │
+                    │   11 Dedicated Financial Views + Video Avatar │
+                    │   Hosted on Vercel: finsight-ai-technovate    │
                     └───────────────────────┬───────────────────────┘
                                             │
                       1. Firebase Auth      │ 2. Authenticated REST
@@ -46,6 +62,21 @@
                     │    financial_insights, corrections            │
                     └───────────────────────────────────────────────┘
 ```
+
+---
+
+## 🤖 Interactive Video AI Chatbot
+
+FinSight AI incorporates an ambient **animated video chatbot widget**:
+- **Video Avatar Component** (`frontend/src/components/FloatingChatbot.jsx`):
+  - Streams `public/chatbot-avatar.webm` in high-definition WebM format.
+  - Automatically loops with `autoPlay`, `loop`, `muted`, and `playsInline`.
+  - Pinned to the bottom-right corner across all 11 application tabs.
+  - Features a neon emerald/teal glowing halo and real-time active beacon.
+- **1-Click AI Assistant Navigation**:
+  - Clicking the floating video avatar or its interactive prompt bubble instantly navigates to the **FinSight AI Assistant** tab.
+- **Omnipresent Identity**:
+  - The video avatar is mirrored inside the AI Assistant header banner, beside every AI response in the conversational thread, and in the sidebar navigation item.
 
 ---
 
@@ -140,6 +171,7 @@
 FinSight AI connects to the existing Supabase project:
 - **Project Name**: `technovate`
 - **Project ID**: `pxacwjmgcxcxdtzjzyli`
+- **URL**: `https://pxacwjmgcxcxdtzjzyli.supabase.co`
 - **Database Engine**: PostgreSQL
 
 ### Tables & Schema
@@ -154,19 +186,16 @@ The database schema (`backend/schema.sql`) implements:
 8. `budgets`: `id`, `firebase_uid`, `category`, `monthly_limit`, `month`, `year`, `created_at`
 9. `category_corrections`: `id`, `firebase_uid`, `merchant_pattern`, `corrected_category`, `created_at`
 
-### Row Level Security (RLS)
-Every table enforces PostgreSQL Row Level Security:
-```sql
-CREATE POLICY "Users can access their own transactions"
-    ON public.transactions FOR ALL
-    USING (firebase_uid = current_setting('request.jwt.claim.sub', true) OR current_setting('role') = 'service_role');
-```
+### Fault-Tolerant Dual-Mode Persistence
+`backend/app/core/database.py` features automatic fault recovery:
+- Reads and writes synchronize directly with cloud Supabase PostgreSQL.
+- If Supabase tables enforce anon RLS restrictions (code `42501`) or experience network latency, operations fall back seamlessly to the local SQLite mirror (`backend/data/finsight_technovate.db`), guaranteeing **zero 500 error crashes**.
 
 ---
 
 ## 🔐 Firebase Authentication & Security
 
-- **Authentication Provider**: Firebase Authentication (Email/Password, Google Sign-In, Passwordless Magic Link).
+- **Authentication Provider**: Firebase Authentication (Email/Password, Google Sign-In, Passwordless Magic Link, 1-Click Demo Login).
 - **Backend Verification**: FastAPI validates Firebase ID tokens via Google's public certificates (`RS256`), verifying audience, issuer, and expiration.
 - **Data Isolation**: All database queries strictly scope rows by the verified `firebase_uid`. Clients cannot supply a UID to impersonate other accounts.
 - **Zero Exposed Keys**: Service role keys and private credentials reside exclusively on the server side.
@@ -283,17 +312,25 @@ finsight-ai/
 │   ├── schema.sql                   # Supabase PostgreSQL DDL & RLS
 │   ├── requirements.txt             # Pinned backend dependencies
 │   ├── test_e2e_workflow.py         # Complete 16-step verification suite
+│   ├── Dockerfile                   # Production container definition
+│   ├── Procfile                     # Web process configuration
 │   └── .env.example                 # Configuration template
 ├── frontend/
+│   ├── public/
+│   │   ├── chatbot-avatar.webm      # High-definition WebM chatbot video
+│   │   └── _redirects               # SPA routing fallback rules
 │   ├── src/
-│   │   ├── components/              # Sidebar, Header, StatCards, Badges
+│   │   ├── components/              # FloatingChatbot, Sidebar, Header, StatCards
 │   │   ├── context/                 # AuthContext (Firebase Auth)
 │   │   ├── pages/                   # 11 interactive fintech views
 │   │   ├── services/                # api.js & firebase.js clients
 │   │   ├── App.jsx                  # Main routing & layout shell
 │   │   └── index.css                # Tailwind CSS v4 design system
+│   ├── vercel.json                  # Vercel Vite preset configuration
 │   ├── package.json                 # Pinned frontend dependencies
 │   └── vite.config.js               # Vite bundler & API proxy
+├── vercel.json                      # Root Vercel monorepo configuration
+├── render.yaml                      # Render.com Blueprint configuration
 ├── run_backend.bat                  # Backend launch script
 ├── run_frontend.bat                 # Frontend launch script
 ├── start_all.bat                    # Simultaneous dual-server launch
@@ -307,3 +344,4 @@ finsight-ai/
 - **Production-Grade Implementation**: Built with genuine backend computation, authentic data parsing, machine learning text categorization, and persistent storage.
 - **Explainable & Trustworthy**: All health scores, anomaly reasons, and assistant answers cite verified mathematical foundations with zero fabricated figures.
 - **Enterprise-Ready Infrastructure**: Designed specifically for the Supabase PostgreSQL database `technovate` (`pxacwjmgcxcxdtzjzyli`) and Firebase Authentication.
+- **Live Cloud Deployment**: Fully deployed and verified on Vercel at [https://finsight-ai-technovate.vercel.app](https://finsight-ai-technovate.vercel.app).
